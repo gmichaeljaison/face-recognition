@@ -1,6 +1,6 @@
 
 %%
-imgdb = imageSet('./data/owndata', 'recursive');
+imgdb = imageSet('./data/att_faces', 'recursive');
 [training, test] = partition(imgdb, [0.8 0.2]);
 
 %%
@@ -11,8 +11,11 @@ for i = 1 : size(training,2)
     imgset = training(i);
     for j = 1 : imgset.Count
         image = read(imgset, j);
-        image = imresize(image, [110 110]);
-        trainingFeatures = [trainingFeatures; extractHOGFeatures(image)];
+%         image = imresize(image, [110 110]);
+        image = imresize(image, [12 12]);
+        trainingFeatures = [trainingFeatures; image(:)'];
+        
+%         trainingFeatures = [trainingFeatures; extractHOGFeatures(image)];
         trainingLabels = [trainingLabels; i];
     end
 end
