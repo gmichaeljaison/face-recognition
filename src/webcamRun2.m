@@ -7,7 +7,8 @@ cam = webcam(camlist{1});
 imgdb = imageSet('../data/mixed', 'recursive');
 
 % featureExtractor = RandomExtractFeature();
-featureExtractor = EigenFaceFeature();
+% featureExtractor = EigenFaceFeature();
+featureExtractor = LaplacianFace();
 
 [trainingFeatures, trainingLabels] = extractFeatures(imgdb, featureExtractor);
 

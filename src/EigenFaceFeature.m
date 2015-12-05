@@ -1,9 +1,7 @@
 classdef EigenFaceFeature < ExtractFeature
-    %EIGENFACEFEATURE Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
-        img_size = [60 60];
+        % default PCA dimension
         dimension = 144
         mean_faces
         projection_matrix
@@ -11,13 +9,12 @@ classdef EigenFaceFeature < ExtractFeature
     
     methods
         function [Ad] = extract(self, images)
-            if iscell(images)
-                A = readImages(self, images);
-            else
-                A = processInputImage(self, images);
-            end
-%             A = processInputImage(self, images);
+            A = readImages(self, images);
             
+            Ad = self.project(A);
+        end
+        
+        function [Ad] = project(self, A)
             if ~isvector(A)
                 computeProjectionMatrix(self, A);
             else
@@ -26,24 +23,6 @@ classdef EigenFaceFeature < ExtractFeature
             
             % 5. Project to lower dimension
             Ad = A * self.projection_matrix;
-        end
-        
-        function A = readImages(self, images)
-            N = numel(images);
-            A = zeros(N, prod(self.img_size));
-            for i = 1 : N
-                img = images{i};
-                A(i,:) = processInputImage(self, img);
-            end
-        end
-        
-        function I = processInputImage(self, img)
-            if (size(img,3) > 1)
-                img = rgb2gray(img);
-            end
-            img = imresize(img, self.img_size);
-            img = im2double(img);
-            I = img(:)';
         end
         
         function [R] = computeProjectionMatrix(self, A)
