@@ -9,7 +9,7 @@ classdef LaplacianFace < ExtractFeature
         t = 1;
         
         % desired dimension
-        dimension = 500;
+        dimension = 25;
         
         % projection matrix
         W;
@@ -18,7 +18,13 @@ classdef LaplacianFace < ExtractFeature
     methods
         function [obj] = LaplacianFace()
             obj.eigenF = EigenFaceFeature();
-            obj.eigenF.dimension = 500;
+            obj.eigenF.dimension = 25;
+        end
+        
+        function init(self, images)
+            A = readImages(self, images);
+            A = self.eigenF.project(A);
+            computeProjectionMatrix(self, A);
         end
         
         function [Ad] = extract(self, images)
@@ -28,14 +34,10 @@ classdef LaplacianFace < ExtractFeature
         
         function [Ad] = project(self, A)
             A = self.eigenF.project(A);
-            
-            if ~isvector(A)
-                self.computeProjection(A);
-            end
             Ad = A * self.W;
         end
         
-        function computeProjection(self, X)
+        function computeProjectionMatrix(self, X)
             % Create graph with N nodes and edge between nearest neighbours
             % create node graph with weights as distance
             N = size(X,1);
