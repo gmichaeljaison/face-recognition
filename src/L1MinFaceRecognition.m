@@ -4,51 +4,59 @@ classdef L1MinFaceRecognition < FaceRecognition
     
     properties
         epsilon
-        trainingFeatures
-        trainingLabels
+        xTrain
+        yTrain
+        SCI_threshold = 0.3;
     end
     
     methods
         function [obj] = L1MinFaceRecognition(xTrain, trainLabels, epsilon)
-            obj.trainingFeatures = xTrain;
-            obj.trainingLabels = trainLabels;
+            obj.xTrain = xTrain;
+            obj.yTrain = trainLabels;
             obj.epsilon = epsilon;
         end
         
         function train()
         end
         
-        function [label] = predict(self, y)
-            A = double(self.trainingFeatures);
-            y = double(y);
+        function [Y] = predict(self, X)
+            nX = size(X,1);
+            
+            A = double(self.xTrain);
+            X = double(X);
 
-            x0 = A * y;
-            
-            xp = l1qc_logbarrier(x0, A', [], y, self.epsilon, 1e-3);
-            
-            nPerson = numel(unique(self.trainingLabels));
-            residuals = zeros(nPerson,1);
-            [~,~,labelInd] = unique(self.trainingLabels);
-            delta_xps = zeros(nPerson, numel(xp));
-            for i = 1 : nPerson
-                delta_xp = zeros(size(xp));
+            Y = cell(nX,1);
+            for n = 1 : nX
+                x = X(n,:)';
+                x0 = A * x;
+
+                xp = l1qc_logbarrier(x0, A', [], x, self.epsilon, 1e-3);
+
+                nPerson = numel(unique(self.yTrain));
+                residuals = zeros(nPerson,1);
+                [~,~,labelInd] = unique(self.yTrain);
+                delta_xps = zeros(nPerson, numel(xp));
+                for i = 1 : nPerson
+                    delta_xp = zeros(size(xp));
+
+                    range = (labelInd == i);
+                    delta_xp(range) = xp(range);
+                    delta_xps(i,:) = delta_xp;
+
+                    err = x - (A' * delta_xp);
+                    residuals(i) = norm(err,2);
+                end
+
+                SCI = self.sparsityConcentrationIndex(delta_xps, xp);
+
+                if (SCI > self.SCI_threshold)
+                    [~,minInd] = min(residuals);
+                    Y{n} = self.yTrain{minInd};
+                else
+                    Y{n} = 'unknown';
+                end
+            end
                 
-                range = (labelInd == i);
-                delta_xp(range) = xp(range);
-                delta_xps(i,:) = delta_xp;
-
-                err = y - (A' * delta_xp);
-                residuals(i) = norm(err,2);
-            end
-            
-            SCI = self.sparsityConcentrationIndex(delta_xps, xp);
-            
-            if (SCI > 0.4)
-                [~,minInd] = min(residuals);
-                label = self.trainingLabels(minInd);
-            else
-                label = 'unknown';
-            end
         end
     end
     

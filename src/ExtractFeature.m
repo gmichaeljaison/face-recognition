@@ -8,7 +8,6 @@ classdef (Abstract) ExtractFeature < handle
     
     methods(Abstract)
         Ad = extract(A)
-        Ad = project(A)
     end
     
     methods
@@ -30,7 +29,7 @@ classdef (Abstract) ExtractFeature < handle
                 img = rgb2gray(img);
             end
             img = imresize(img, self.img_size);
-            img = im2double(img);
+%             img = im2double(img);
             I = img(:)';
         end
     end
