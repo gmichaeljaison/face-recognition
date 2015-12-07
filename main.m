@@ -1,7 +1,7 @@
 
 %%
 imgdb = imageSet('./data/owndata', 'recursive');
-[training, test] = partition(imgdb, [0.8 0.2]);
+[training, test] = partition(imgdb, [0.9 0.1]);
 
 %%
 trainingFeatures = [];
