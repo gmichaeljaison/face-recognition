@@ -9,7 +9,7 @@ classdef LaplacianFace < ExtractFeature
         t = 1;
         
         % desired dimension
-        dimension = 25;
+        dimension = 35;
         
         % projection matrix
         W;
@@ -18,10 +18,11 @@ classdef LaplacianFace < ExtractFeature
     methods
         function [obj] = LaplacianFace()
             obj.eigenF = EigenFaceFeature();
-            obj.eigenF.dimension = 25;
         end
         
         function init(self, images)
+            self.eigenF.init(images);
+            
             A = readImages(self, images);
             A = self.eigenF.project(A);
             computeProjectionMatrix(self, A);

@@ -5,6 +5,7 @@ classdef EigenFaceFeature < ExtractFeature
         dimension = 7
         mean_faces
         projection_matrix
+        eigenFaces
     end
     
     methods
@@ -49,8 +50,9 @@ classdef EigenFaceFeature < ExtractFeature
                 K = self.dimension;
             end;
             R = evectors(1:K, :)';
+            self.eigenFaces = R;
            
-            self.projection_matrix = R;
+            self.projection_matrix = normr(R);
         end
     end
     

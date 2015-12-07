@@ -3,7 +3,7 @@ addpath('../lib');
 
 %%
 
-imgdb = imageSet('../data/CroppedYale', 'recursive');
+imgdb = imageSet('../data/lfw', 'recursive');
 [training, test] = partition(imgdb, [0.8 0.2]);
 
 % featureExtractor = RandomExtractFeature();
@@ -14,25 +14,29 @@ featureExtractor = LaplacianFace();
 [images, yTrain] = readImageSet(training);
 [testImgs, yTest] = readImageSet(test);
 
-featureExtractor.init(images);
-xTrain = featureExtractor.extract(images);
-xTest = featureExtractor.extract(testImgs);
-
-% faceRec = L1MinFaceRecognition(xTrain, yTrain, 0.05);
-
-% Model = fitcecoc(xTrain, yTrain);
-
-
 %%
 
-% yPredict = faceRec.predict(xTest);
+% dims = 15 : 10 : 120;
+dims = [35 : 15 : 120]';
+accuracy = zeros(numel(dims), 1);
 
-Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1, ...
-    'Distance', 'mahalanobis', 'DistanceWeight', 'inverse');
-[yPredict,score,cost] = Model.predict(xTest);
+for i = 1 : numel(dims)
+    featureExtractor.dimension = dims(i);
+    featureExtractor.eigenF.dimension = dims(i) + 20;
+    
+    featureExtractor.init(images);
+    xTrain = featureExtractor.extract(images);
+    xTest = featureExtractor.extract(testImgs);
 
-c = confusionmat(yPredict, yTest');
-accuracy = sum(diag(c)) / sum(c(:));
+    Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1, ...
+        'Distance', 'mahalanobis', 'DistanceWeight', 'inverse');
+    yPredict = Model.predict(xTest);
+
+    c = confusionmat(yPredict, yTest');
+    accuracy(i) = sum(diag(c)) / sum(c(:));
+end
+
+clear c;
 
 %%
 
