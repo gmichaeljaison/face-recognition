@@ -2,7 +2,7 @@ classdef EigenFaceFeature < ExtractFeature
     
     properties
         % default PCA dimension
-        dimension = 7
+        dimension = 30
         mean_faces
         projection_matrix
         eigenFaces

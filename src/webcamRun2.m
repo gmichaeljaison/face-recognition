@@ -4,11 +4,13 @@ camlist = webcamlist;
 cam = webcam(camlist{1});
 
 %%
-imgdb = imageSet('../data/small', 'recursive');
+imgdb = imageSet('../data/small-2', 'recursive');
 
 % featureExtractor = RandomExtractFeature();
-% featureExtractor = EigenFaceFeature();
-featureExtractor = LaplacianFace();
+featureExtractor = EigenFaceFeature();
+% featureExtractor = LaplacianFace();
+featureExtractor.dimension = 25;
+% featureExtractor.eigenF.dimension = 30;
 
 [images, yTrain] = readImageSet(imgdb);
 
@@ -20,8 +22,12 @@ faceDetector = vision.CascadeObjectDetector;
 shapeInserter = vision.ShapeInserter('BorderColor','Custom', ...
     'CustomBorderColor',uint8([255 255 0]));
 
-% Model = L1MinFaceRecognition(xTrain, yTrain, 0.05);
-Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1);
+
+%  Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1, ...
+%         'Distance', 'mahalanobis', 'DistanceWeight', 'inverse');
+
+% Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1);
+Model = L1MinFaceRecognition(xTrain, yTrain, 0.05);
 
 figure; hold on;
 set(gcf,'currentchar',' ')
@@ -42,7 +48,7 @@ while get(gcf,'currentchar') == ' '
         faceFeature = extract(featureExtractor, faceimg);
     
         label = predict(Model, faceFeature);
-    
+        
         bboxTmp = reshape(bbox, [2 2])';
         imshot = insertText(imshot, bboxTmp(1,:), label{1});
     

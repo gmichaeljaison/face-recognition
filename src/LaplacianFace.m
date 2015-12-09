@@ -9,7 +9,7 @@ classdef LaplacianFace < ExtractFeature
         t = 1;
         
         % desired dimension
-        dimension = 35;
+        dimension = 30;
         
         % projection matrix
         W;
@@ -18,6 +18,7 @@ classdef LaplacianFace < ExtractFeature
     methods
         function [obj] = LaplacianFace()
             obj.eigenF = EigenFaceFeature();
+            obj.eigenF.dimension = obj.dimension;
         end
         
         function init(self, images)
@@ -58,7 +59,11 @@ classdef LaplacianFace < ExtractFeature
             [V,E] = eig(A, B);
             [~,sI] = sort(diag(E));
             
-            self.W = V(:, sI(1:self.dimension));
+            K = size(V,1);
+            if (K > self.dimension)
+                K = self.dimension;
+            end;
+            self.W = V(:, sI(1:K));
         end
         
         function constructGraph(self, X)

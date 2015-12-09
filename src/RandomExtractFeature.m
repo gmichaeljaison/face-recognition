@@ -3,16 +3,26 @@ classdef RandomExtractFeature < ExtractFeature
     %   Detailed explanation goes here
     
     properties
-        resize_size = [12 12];
+        resize_size = [12 10];
     end
     
     methods
-        function [Ad] = extract(self, A)
-            if size(A,3) > 1
-                A = rgb2gray(A);
+        function [A] = extract(self, images)
+            N = numel(images);
+            A = zeros(N, prod(self.resize_size));
+            for i = 1 : N
+                img = images{i};
+                A(i,:) = processInputImage(self, img);
             end
-            Ad = imresize(A, self.resize_size);
-            Ad = Ad(:)';
+        end
+        
+        function I = processInputImage(self, img)
+            if (size(img,3) > 1)
+                img = rgb2gray(img);
+            end
+            img = imresize(img, self.resize_size);
+            img = im2double(img);
+            I = img(:)';
         end
     end
     

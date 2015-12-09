@@ -6,11 +6,16 @@ classdef HoGExtractFeature < ExtractFeature
     methods
         function [Ad] = extract(self, images)
             A = readImages(self, images);
-            Ad = extractHOGFeatures(A);
+            Ad = project(self, A);
         end
         
         function [Ad] = project(self, A)
-            Ad = extractHOGFeatures(A);
+            N = size(A,1);
+            Ad = [];
+            for i = 1 : N
+                Ad(end+1,:) = extractHOGFeatures(reshape(A(i,:), ...
+                    self.img_size));
+            end
         end
     end
     

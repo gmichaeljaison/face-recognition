@@ -3,12 +3,12 @@ addpath('../lib');
 
 %%
 
-imgdb = imageSet('../data/lfw', 'recursive');
-[training, test] = partition(imgdb, [0.8 0.2]);
+imgdb = imageSet('../data/CroppedYale', 'recursive');
+[training, test] = partition(imgdb, [0.5 0.5]);
 
 % featureExtractor = RandomExtractFeature();
-% featureExtractor = EigenFaceFeature();
-featureExtractor = LaplacianFace();
+featureExtractor = EigenFaceFeature();
+% featureExtractor = LaplacianFace();
 % featureExtractor = HoGExtractFeature();
 
 [images, yTrain] = readImageSet(training);
@@ -16,45 +16,50 @@ featureExtractor = LaplacianFace();
 
 %%
 
-% dims = 15 : 10 : 120;
-dims = [35 : 15 : 120]';
+% dims = 15 : 10 : 110;
+% dims = [15 : 10 : 110]';
+dims = 55;
 accuracy = zeros(numel(dims), 1);
 
 for i = 1 : numel(dims)
     featureExtractor.dimension = dims(i);
-    featureExtractor.eigenF.dimension = dims(i) + 20;
+%     featureExtractor.eigenF.dimension = dims(i);
     
     featureExtractor.init(images);
     xTrain = featureExtractor.extract(images);
     xTest = featureExtractor.extract(testImgs);
 
-    Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1, ...
-        'Distance', 'mahalanobis', 'DistanceWeight', 'inverse');
-    yPredict = Model.predict(xTest);
-
+%     Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1, ...
+%         'Distance', 'euclidean', 'DistanceWeight', 'inverse');
+%     Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1, ...
+%         'Distance', 'mahalanobis', 'DistanceWeight', 'inverse');
+   Model = L1MinFaceRecognition(xTrain, yTrain, 0.05);
+    
+   yPredict = Model.predict(xTest);
+    
     c = confusionmat(yPredict, yTest');
     accuracy(i) = sum(diag(c)) / sum(c(:));
 end
 
-clear c;
+clear c i;
 
 %%
-
-[labels,~,ic] = unique(yTrain);
-
-avgXTrain = zeros(numel(labels), size(xTrain,2));
-for i = 1 : numel(labels)
-    xi = xTrain(ic == i, :);
-    avgXTrain(i,:) = mean(xi);
-end
-
-
-Model = fitcknn(avgXTrain, labels, 'NumNeighbors', 1, ...
-    'Distance', 'euclidean', 'DistanceWeight', 'inverse');
-yPredict = Model.predict(xTest);
-
-c = confusionmat(yPredict, yTest');
-accuracy = sum(diag(c)) / sum(c(:));
+% 
+% [labels,~,ic] = unique(yTrain);
+% 
+% avgXTrain = zeros(numel(labels), size(xTrain,2));
+% for i = 1 : numel(labels)
+%     xi = xTrain(ic == i, :);
+%     avgXTrain(i,:) = mean(xi);
+% end
+% 
+% 
+% Model = fitcknn(avgXTrain, labels, 'NumNeighbors', 1, ...
+%     'Distance', 'euclidean', 'DistanceWeight', 'inverse');
+% yPredict = Model.predict(xTest);
+% 
+% c = confusionmat(yPredict, yTest');
+% accuracy = sum(diag(c)) / sum(c(:));
 
 %{
 nTest = size(xTest,1);

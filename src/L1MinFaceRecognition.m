@@ -6,14 +6,17 @@ classdef L1MinFaceRecognition < FaceRecognition
         epsilon
         xTrain
         yTrain
-        SCI_threshold = 0.3;
+        SCI_threshold = 0.4;
     end
     
     methods
-        function [obj] = L1MinFaceRecognition(xTrain, trainLabels, epsilon)
-            obj.xTrain = xTrain;
-            obj.yTrain = trainLabels;
+        function [obj] = L1MinFaceRecognition(xTrain, yTrain, epsilon)
+            obj.xTrain = normr(xTrain);
+            obj.yTrain = yTrain;
             obj.epsilon = epsilon;
+            
+%             s = sum(xTrain, 2);
+%             obj.xTrain = xTrain ./ repmat(s, 1, size(xTrain,2));
         end
         
         function train()
@@ -21,6 +24,9 @@ classdef L1MinFaceRecognition < FaceRecognition
         
         function [Y] = predict(self, X)
             nX = size(X,1);
+            X = normr(X);
+%             s = sum(abs(X), 2);
+%             X = X ./ repmat(s, 1, size(X,2));
             
             A = double(self.xTrain);
             X = double(X);
@@ -30,11 +36,13 @@ classdef L1MinFaceRecognition < FaceRecognition
                 x = X(n,:)';
                 x0 = A * x;
 
-                xp = l1qc_logbarrier(x0, A', [], x, self.epsilon, 1e-3);
+%                 xp = l1qc_logbarrier(x0, A', [], x, self.epsilon, 1e-3);
+                xp = l1qc_logbarrier(x0, A', [], x, 0.005, 1e-1);
+%                 xp = l1eq_pd(x0, A', [], x, 1e-3);
 
                 nPerson = numel(unique(self.yTrain));
                 residuals = zeros(nPerson,1);
-                [~,~,labelInd] = unique(self.yTrain);
+                [labels,~,labelInd] = unique(self.yTrain);
                 delta_xps = zeros(nPerson, numel(xp));
                 for i = 1 : nPerson
                     delta_xp = zeros(size(xp));
@@ -48,10 +56,12 @@ classdef L1MinFaceRecognition < FaceRecognition
                 end
 
                 SCI = self.sparsityConcentrationIndex(delta_xps, xp);
+                disp('residuals: '); disp(residuals);
+                disp('SCI: '); disp(SCI);
 
                 if (SCI > self.SCI_threshold)
                     [~,minInd] = min(residuals);
-                    Y{n} = self.yTrain{minInd};
+                    Y{n} = labels{minInd};
                 else
                     Y{n} = 'unknown';
                 end
@@ -65,9 +75,11 @@ classdef L1MinFaceRecognition < FaceRecognition
             nPersons = size(delta_xps,1);
             SCIs = zeros(nPersons,1);
             for i = 1 : nPersons
-                SCIs(i) = norm(delta_xps(i,:)) / norm(xp);
+                SCIs(i) = norm(delta_xps(i,:),1) / norm(xp,1);
             end
             SCI = max(SCIs);
+            
+            SCI = (nPersons/(nPersons-1)) * SCI - 1/(nPersons-1);
         end
     end
     
