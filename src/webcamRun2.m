@@ -4,17 +4,17 @@ camlist = webcamlist;
 cam = webcam(camlist{1});
 
 %%
-imgdb = imageSet('../data/small-2', 'recursive');
-
-% featureExtractor = RandomExtractFeature();
-featureExtractor = EigenFaceFeature();
-% featureExtractor = LaplacianFace();
-featureExtractor.dimension = 25;
-% featureExtractor.eigenF.dimension = 30;
-
+imgdb = imageSet('../data/small-5', 'recursive');
 [images, yTrain] = readImageSet(imgdb);
 
+% featureExtractor = ResizeExtractFeature();
+featureExtractor = EigenFaceFeature();
+% featureExtractor = LaplacianFace();
+
+featureExtractor.dimension = 25;
+% featureExtractor.eigenF.dimension = 30;
 featureExtractor.init(images);
+
 xTrain = featureExtractor.extract(images);
 
 %%
@@ -23,8 +23,8 @@ shapeInserter = vision.ShapeInserter('BorderColor','Custom', ...
     'CustomBorderColor',uint8([255 255 0]));
 
 
-%  Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1, ...
-%         'Distance', 'mahalanobis', 'DistanceWeight', 'inverse');
+ KnnModel = fitcknn(xTrain, yTrain, 'NumNeighbors', 1, ...
+        'Distance', 'mahalanobis', 'DistanceWeight', 'inverse');
 
 % Model = fitcknn(xTrain, yTrain, 'NumNeighbors', 1);
 Model = L1MinFaceRecognition(xTrain, yTrain, 0.05);
@@ -34,7 +34,7 @@ set(gcf,'currentchar',' ')
 while get(gcf,'currentchar') == ' '
 % while (true)
     imshot = snapshot(cam);
-    imshot = imresize(imshot, 0.3);
+    imshot = imresize(imshot, 0.6);
     
     bboxes = step(faceDetector, imshot);
     if (numel(bboxes) == 0)
@@ -47,7 +47,10 @@ while get(gcf,'currentchar') == ' '
         faceimg = imcrop(imshot, bbox);
         faceFeature = extract(featureExtractor, faceimg);
     
-        label = predict(Model, faceFeature);
+        label = Model.predict(faceFeature);
+%         if ~strcmp(label, 'unknown')
+%             label = KnnModel.predict(faceFeature);
+%         end
         
         bboxTmp = reshape(bbox, [2 2])';
         imshot = insertText(imshot, bboxTmp(1,:), label{1});

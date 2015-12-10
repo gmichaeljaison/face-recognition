@@ -6,9 +6,9 @@ addpath('../lib');
 imgdb = imageSet('../data/CroppedYale', 'recursive');
 [training, test] = partition(imgdb, [0.5 0.5]);
 
-% featureExtractor = RandomExtractFeature();
-featureExtractor = EigenFaceFeature();
-% featureExtractor = LaplacianFace();
+% featureExtractor = ResizeExtractFeature();
+% featureExtractor = EigenFaceFeature();
+featureExtractor = LaplacianFace();
 % featureExtractor = HoGExtractFeature();
 
 [images, yTrain] = readImageSet(training);
@@ -18,12 +18,12 @@ featureExtractor = EigenFaceFeature();
 
 % dims = 15 : 10 : 110;
 % dims = [15 : 10 : 110]';
-dims = 55;
+dims = 35;
 accuracy = zeros(numel(dims), 1);
 
 for i = 1 : numel(dims)
     featureExtractor.dimension = dims(i);
-%     featureExtractor.eigenF.dimension = dims(i);
+    featureExtractor.eigenF.dimension = dims(i);
     
     featureExtractor.init(images);
     xTrain = featureExtractor.extract(images);

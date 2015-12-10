@@ -37,7 +37,7 @@ classdef L1MinFaceRecognition < FaceRecognition
                 x0 = A * x;
 
 %                 xp = l1qc_logbarrier(x0, A', [], x, self.epsilon, 1e-3);
-                xp = l1qc_logbarrier(x0, A', [], x, 0.005, 1e-1);
+                xp = l1qc_logbarrier(x0, A', [], x, 0.005, 1e-3);
 %                 xp = l1eq_pd(x0, A', [], x, 1e-3);
 
                 nPerson = numel(unique(self.yTrain));
