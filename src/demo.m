@@ -4,7 +4,7 @@ addpath('../lib');
 
 %%
 
-imgdb = imageSet('../data/small-2', 'recursive');
+imgdb = imageSet('../data/small', 'recursive');
 
 % featureExtractor = EigenFaceFeature();
 featureExtractor = LaplacianFace();

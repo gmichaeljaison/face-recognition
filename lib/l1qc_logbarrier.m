@@ -98,7 +98,7 @@ lbiter = ceil((log(2*N+1)-log(lbtol)-log(tau))/log(mu));
 disp(sprintf('Number of log barrier iterations = %d\n', lbiter));
 
 totaliter = 0;
-
+xp = x;
 for ii = 1:lbiter
 
   [xp, up, ntiter] = l1qc_newton(x, u, A, At, b, epsilon, tau, newtontol, newtonmaxiter, cgtol, cgmaxiter);

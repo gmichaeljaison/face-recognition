@@ -4,7 +4,7 @@ camlist = webcamlist;
 cam = webcam(camlist{1});
 
 %%
-imgdb = imageSet('../data/small-5', 'recursive');
+imgdb = imageSet('../data/small', 'recursive');
 [images, yTrain] = readImageSet(imgdb);
 
 % featureExtractor = ResizeExtractFeature();
